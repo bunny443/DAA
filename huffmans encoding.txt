@@ -1,0 +1,111 @@
+import java.util.*;
+
+class Node {
+    char ch;
+    int frequency;
+
+    Node left, right;
+
+    Node(char ch, int frequency) {
+        this.ch = ch;
+        this.frequency = frequency;
+    }
+
+    Node(int frequency, Node left, Node right) {
+        this.frequency = frequency;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+public class HuffmanEncoding {
+
+    // Generate Huffman codes
+    static void generateCodes(Node root, String code,
+                              Map<Character, String> huffmanCode) {
+
+        if (root == null)
+            return;
+
+        // Leaf node
+        if (root.left == null && root.right == null) {
+            huffmanCode.put(root.ch, code);
+            return;
+        }
+
+        generateCodes(root.left, code + "0", huffmanCode);
+        generateCodes(root.right, code + "1", huffmanCode);
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter text: ");
+        String text = sc.nextLine();
+
+        // Count frequency of each character
+        Map<Character, Integer> frequency = new HashMap<>();
+
+        for (char ch : text.toCharArray()) {
+            frequency.put(ch, frequency.getOrDefault(ch, 0) + 1);
+        }
+
+        // Min Heap based on frequency
+        PriorityQueue<Node> pq = new PriorityQueue<>(
+                Comparator.comparingInt(node -> node.frequency)
+        );
+
+        // Insert all characters into priority queue
+        for (Map.Entry<Character, Integer> entry : frequency.entrySet()) {
+            pq.add(new Node(entry.getKey(), entry.getValue()));
+        }
+
+        // Build Huffman Tree
+        while (pq.size() > 1) {
+
+            // Remove two nodes with smallest frequency
+            Node left = pq.poll();
+            Node right = pq.poll();
+
+            // Create new node
+            Node newNode = new Node(
+                    left.frequency + right.frequency,
+                    left,
+                    right
+            );
+
+            pq.add(newNode);
+        }
+
+        Node root = pq.poll();
+
+        // Generate Huffman codes
+        Map<Character, String> huffmanCode = new HashMap<>();
+        generateCodes(root, "", huffmanCode);
+
+        // Display frequencies and codes
+        System.out.println("\nCharacter  Frequency  Huffman Code");
+
+        for (Map.Entry<Character, Integer> entry : frequency.entrySet()) {
+            System.out.println("    " + entry.getKey() +
+                    "          " + entry.getValue() +
+                    "           " + huffmanCode.get(entry.getKey()));
+        }
+
+        // Encode the input text
+        StringBuilder encodedText = new StringBuilder();
+
+        for (char ch : text.toCharArray()) {
+            encodedText.append(huffmanCode.get(ch));
+        }
+
+        System.out.println("\nOriginal Text: " + text);
+        System.out.println("Encoded Text: " + encodedText);
+
+        sc.close();
+    }
+}
+
+   
+
